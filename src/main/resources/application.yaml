@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: expense-service-transaction-demo
+  datasource:
+    url: jdbc:h2:mem:expenses
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+fraud:
+  base-url: ${FRAUD_BASE_URL:http://localhost:8081}
