@@ -3,8 +3,8 @@ package com.hamza.expenses.api;
 import com.hamza.expenses.domain.Expense;
 import com.hamza.expenses.domain.ExpenseStatus;
 import com.hamza.expenses.model.SubmitExpense;
-import com.hamza.expenses.pitfalls.ExpenseService;
 import com.hamza.expenses.repository.ExpenseRepository;
+import com.hamza.expenses.solution.CorrectedExpenseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,7 +24,7 @@ import java.util.UUID;
 @RequestMapping("/expenses")
 @RequiredArgsConstructor
 public class ExpenseController {
-    private final ExpenseService service;
+    private final CorrectedExpenseService service;
     private final ExpenseRepository repository;
 
     @PostMapping

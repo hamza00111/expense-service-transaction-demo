@@ -54,6 +54,27 @@ public class Expense {
         status = ExpenseStatus.APPROVED;
     }
 
+    public void markVerifying() {
+        if (status != ExpenseStatus.PENDING) {
+            throw new IllegalStateException("Only a pending expense can be verified");
+        }
+        status = ExpenseStatus.VERIFYING;
+    }
+
+    public void approveAfterVerification() {
+        if (status != ExpenseStatus.VERIFYING) {
+            throw new IllegalStateException("Expense is not being verified");
+        }
+        status = ExpenseStatus.APPROVED;
+    }
+
+    public void markFraudCheckFailed() {
+        if (status != ExpenseStatus.VERIFYING) {
+            throw new IllegalStateException("Expense is not being verified");
+        }
+        status = ExpenseStatus.FRAUD_CHECK_FAILED;
+    }
+
     public UUID id() { return id; }
     public String requestId() { return requestId; }
     public BigDecimal amount() { return amount; }

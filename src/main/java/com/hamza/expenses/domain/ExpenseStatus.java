@@ -2,5 +2,7 @@ package com.hamza.expenses.domain;
 
 public enum ExpenseStatus {
     PENDING,
-    APPROVED
+    VERIFYING,
+    APPROVED,
+    FRAUD_CHECK_FAILED
 }

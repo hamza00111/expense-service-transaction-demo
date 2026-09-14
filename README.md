@@ -1,10 +1,18 @@
 # Expense service transaction pitfalls
 
-A Java 21 / Spring Boot 4.1.1 Maven project built around an intentionally problematic transaction boundary.
+A Java 21 / Spring Boot 4.1.1 Maven project containing the original flawed implementation and a corrected implementation.
 
-The service under study is in:
+## Compare the implementations
+
+Original code, deliberately unchanged:
 
     com.hamza.expenses.pitfalls.ExpenseService
+
+Corrected orchestration:
+
+    com.hamza.expenses.solution.CorrectedExpenseService
+
+The REST controller uses the corrected implementation. The original service remains available for study and for its unit tests.
 
 ## Run
 
@@ -21,17 +29,27 @@ Submit an expense:
 
 The fraud service URL is externalized with FRAUD_BASE_URL.
 
-## Intentional pitfalls
+## The five original pitfalls
 
-ExpenseService is deliberately not production-ready:
-
-1. recordFailure is invoked from the same bean. Self-invocation bypasses the Spring proxy, so REQUIRES_NEW is not applied.
-2. The database transaction remains open during the remote HTTP call.
+1. Self-invocation prevents REQUIRES_NEW from being applied.
+2. The remote HTTP call keeps the database transaction open.
 3. The database write and Kafka publication are not atomic.
-4. KafkaTemplate.send is asynchronous; later failures are not caught by the catch block.
-5. failure.getMessage may be null, unstable, or sensitive.
+4. KafkaTemplate.send is asynchronous and later failures escape the catch block.
+5. A retry with the same requestId is not handled as an idempotent submission.
 
-Supporting packages make the example runnable without correcting those issues.
+## Corrected flow
+
+The solution package:
+
+- uses short transactions in ExpenseTransactions;
+- performs the fraud HTTP call outside a database transaction;
+- records failures through a separate proxied FailureRecorder;
+- writes approval and an outbox row in the same transaction;
+- publishes pending outbox events and waits for Kafka's asynchronous result;
+- gives every reliable event an eventId for consumer deduplication;
+- uses requestId plus a conditional state transition to prevent duplicate processing.
+
+The outbox is intentionally at-least-once. A crash after Kafka accepts an event but before publishedAt is stored may produce a duplicate, so consumers must deduplicate by eventId.
 
 ## Endpoints
 
